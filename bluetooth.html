@@ -1,0 +1,55 @@
+<html>
+	<body>
+        Please use google chrome, google chrome mobile or microsoft edge.Thanks
+	<button onclick="j()">Connect</button>
+	<button onclick="j2()">Disconnect</button>
+	<script>
+	async function j(){
+		try {
+			bluetoothDevice = await navigator.bluetooth.requestDevice({acceptAllDevices: true,optionalServices:["9e35fa00-4344-44d4-a2e2-0c7f6046878b"]});
+			const server=await bluetoothDevice.gatt.connect();
+			const service =await server.getPrimaryService("9e35fa00-4344-44d4-a2e2-0c7f6046878b");
+			      chara = await service.getCharacteristic("9e35fa01-4344-44d4-a2e2-0c7f6046878b");
+			await chara.startNotifications();
+			chara.addEventListener('characteristicvaluechanged',handle);
+			}
+		catch(error)
+		{
+            alert('Argh! ' + error);
+	    }
+	}
+	function handle(event)
+	{
+		let value= event.target.value;
+			document.getElementById("gps").innerHTML=("Batt="+value.getUint8(0).toString());
+			document.getElementById("gps1").innerHTML=("Button="+value.getUint8(1).toString());//button Takeoff=1 1=2 2=4 B=8 A=16 R1=32 R2=64 L1=128
+			document.getElementById("gps2").innerHTML=("Analog Button="+value.getUint8(2).toString());//button L2=1 Analog 1=2 Analog 2=4 
+			document.getElementById("gps3").innerHTML=("right analog x="+value.getUint8(3).toString()); //0-255
+			document.getElementById("gps4").innerHTML=("right analog y="+value.getUint8(4).toString()); //0-255
+			document.getElementById("gps5").innerHTML=("left analog x="+value.getUint8(5).toString()); //0-255
+			document.getElementById("gps6").innerHTML=("left analog y="+value.getUint8(6).toString()); //0-255
+
+	}
+
+    async function j2()
+	{
+		try {
+			await chara.stopNotifications();
+			chara.removeEventListener('characteristicvaluechanged',handle);
+			} 
+		catch(error) {
+			alert('Argh! ' + error);
+			}
+		bluetoothDevice.gatt.disconnect();
+	}
+	</script>
+	<p id="gps">p</p>
+	<p id="gps1">p</p>
+	<p id="gps2">p</p>
+	<p id="gps3">p</p>
+	<p id="gps4">p</p>
+	<p id="gps5">p</p>
+	<p id="gps6">p</p>
+		
+	</body>
+</html>
